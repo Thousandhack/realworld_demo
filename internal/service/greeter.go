@@ -3,24 +3,24 @@ package service
 import (
 	"context"
 
-	v1 "realworld_demo/api/helloworld/v1"
+	v1 "realworld_demo/api/realworld/v1"
 	"realworld_demo/internal/biz"
 )
 
 // GreeterService is a greeter service.
-type GreeterService struct {
-	v1.UnimplementedGreeterServer
+type RealWorldService struct {
+	v1.UnimplementedRealWorldServer
 
 	uc *biz.GreeterUsecase
 }
 
 // NewGreeterService new a greeter service.
-func NewGreeterService(uc *biz.GreeterUsecase) *GreeterService {
-	return &GreeterService{uc: uc}
+func NewGreeterService(uc *biz.GreeterUsecase) *RealWorldService {
+	return &RealWorldService{uc: uc}
 }
 
 // SayHello implements helloworld.GreeterServer.
-func (s *GreeterService) SayHello(ctx context.Context, in *v1.HelloRequest) (*v1.HelloReply, error) {
+func (s *RealWorldService) SayHello(ctx context.Context, in *v1.HelloRequest) (*v1.HelloReply, error) {
 	g, err := s.uc.CreateGreeter(ctx, &biz.Greeter{Hello: in.Name})
 	if err != nil {
 		return nil, err
