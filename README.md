@@ -49,3 +49,16 @@ docker build -t <your-docker-image-name> .
 docker run --rm -p 8000:8000 -p 9000:9000 -v </path/to/your/configs>:/data/conf <your-docker-image-name>
 ```
 
+```
+生成api的命令可以是：
+make api # 前提是需要安装make工具
+运行项目命令：
+kratos run
+
+make config  # 生成配置文件 更新配置文件的时候重新生成
+
+biz 目录主要编写业务逻辑代码
+
+# wire 注入相关生成的命令：
+cd cmd/realworld_demo/ && wire
+```
