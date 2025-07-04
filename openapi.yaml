@@ -4,17 +4,33 @@
 openapi: 3.0.3
 info:
     title: RealWorld API
-    description: The greeting service definition.
     version: 0.0.1
 paths:
-    /helloworld/{name}:
+    /api/article:
+        post:
+            tags:
+                - RealWorld
+            operationId: RealWorld_CreateArticle
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/realworld.v1.CreateArticleRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/realworld.v1.SingleArticleReply'
+    /api/article/{slug}:
         get:
             tags:
                 - RealWorld
-            description: Sends a greeting
-            operationId: RealWorld_SayHello
+            operationId: RealWorld_GetArticle
             parameters:
-                - name: name
+                - name: slug
                   in: path
                   required: true
                   schema:
@@ -25,14 +41,528 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/realworld.v1.HelloReply'
+                                $ref: '#/components/schemas/realworld.v1.SingleArticleReply'
+        put:
+            tags:
+                - RealWorld
+            operationId: RealWorld_UpdateArticle
+            parameters:
+                - name: slug
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/realworld.v1.CreateArticleRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/realworld.v1.SingleArticleReply'
+        delete:
+            tags:
+                - RealWorld
+            operationId: RealWorld_DeleteArticle
+            parameters:
+                - name: slug
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/realworld.v1.SingleArticleReply'
+    /api/articles:
+        get:
+            tags:
+                - RealWorld
+            operationId: RealWorld_ListArticles
+            parameters:
+                - name: tag
+                  in: query
+                  schema:
+                    type: string
+                - name: author
+                  in: query
+                  schema:
+                    type: string
+                - name: favorited
+                  in: query
+                  schema:
+                    type: string
+                - name: limit
+                  in: query
+                  schema:
+                    type: string
+                - name: offset
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/realworld.v1.ListArticlesReply'
+    /api/articles/feed:
+        get:
+            tags:
+                - RealWorld
+            operationId: RealWorld_FeedListArticles
+            parameters:
+                - name: limit
+                  in: query
+                  schema:
+                    type: string
+                - name: offset
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/realworld.v1.ListArticlesReply'
+    /api/articles/{slug}/comments:
+        get:
+            tags:
+                - RealWorld
+            operationId: RealWorld_GetComment
+            parameters:
+                - name: slug
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/realworld.v1.SingleCommentReply'
+        post:
+            tags:
+                - RealWorld
+            operationId: RealWorld_AddComment
+            parameters:
+                - name: slug
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/realworld.v1.AddCommentRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/realworld.v1.SingleCommentReply'
+    /api/articles/{slug}/comments/{id}:
+        delete:
+            tags:
+                - RealWorld
+            operationId: RealWorld_DeleteComment
+            parameters:
+                - name: slug
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/realworld.v1.SingleCommentReply'
+    /api/articles/{slug}/favorite:
+        post:
+            tags:
+                - RealWorld
+            operationId: RealWorld_FavoriteArticle
+            parameters:
+                - name: slug
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/realworld.v1.FavoriteArticleRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/realworld.v1.SingleArticleReply'
+        delete:
+            tags:
+                - RealWorld
+            operationId: RealWorld_UnFavoriteArticle
+            parameters:
+                - name: slug
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/realworld.v1.SingleArticleReply'
+    /api/profile/{username}:
+        get:
+            tags:
+                - RealWorld
+            operationId: RealWorld_GetProfile
+            parameters:
+                - name: username
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/realworld.v1.GetProfileReply'
+    /api/profile/{username}/follow:
+        post:
+            tags:
+                - RealWorld
+            operationId: RealWorld_FollowUser
+            parameters:
+                - name: username
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/realworld.v1.FollowUserRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/realworld.v1.ProfileReply'
+        delete:
+            tags:
+                - RealWorld
+            operationId: RealWorld_UnFollowUser
+            parameters:
+                - name: username
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/realworld.v1.ProfileReply'
+    /api/tags:
+        get:
+            tags:
+                - RealWorld
+            operationId: RealWorld_GetTags
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/realworld.v1.TagsListReply'
+    /api/user:
+        get:
+            tags:
+                - RealWorld
+            operationId: RealWorld_GetCurrentUser
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/realworld.v1.UserReply'
+        put:
+            tags:
+                - RealWorld
+            operationId: RealWorld_UpdateUser
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/realworld.v1.UpdateUserRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/realworld.v1.UserReply'
+    /api/users:
+        post:
+            tags:
+                - RealWorld
+            operationId: RealWorld_Register
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/realworld.v1.RegisterRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/realworld.v1.RegisterReply'
+    /api/users/login:
+        post:
+            tags:
+                - RealWorld
+            operationId: RealWorld_Login
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/realworld.v1.LoginRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/realworld.v1.LoginReply'
 components:
     schemas:
-        realworld.v1.HelloReply:
+        realworld.v1.AddCommentRequest:
             type: object
             properties:
-                message:
+                slug:
                     type: string
-            description: The response message containing the greetings
+                comment:
+                    $ref: '#/components/schemas/realworld.v1.AddCommentRequest_Comment'
+        realworld.v1.AddCommentRequest_Comment:
+            type: object
+            properties:
+                body:
+                    type: string
+        realworld.v1.Article:
+            type: object
+            properties:
+                slug:
+                    type: string
+                title:
+                    type: string
+                description:
+                    type: string
+                body:
+                    type: string
+                tagList:
+                    type: array
+                    items:
+                        type: string
+                createdAt:
+                    type: string
+                updatedAt:
+                    type: string
+                favorited:
+                    type: boolean
+                favoritesCount:
+                    type: integer
+                    format: uint32
+                author:
+                    $ref: '#/components/schemas/realworld.v1.Author'
+        realworld.v1.Author:
+            type: object
+            properties:
+                username:
+                    type: string
+                bio:
+                    type: string
+                image:
+                    type: string
+                following:
+                    type: boolean
+        realworld.v1.CreateArticleRequest:
+            type: object
+            properties:
+                article:
+                    $ref: '#/components/schemas/realworld.v1.CreateArticleRequest_Article'
+                slug:
+                    type: string
+        realworld.v1.CreateArticleRequest_Article:
+            type: object
+            properties:
+                title:
+                    type: string
+                description:
+                    type: string
+                body:
+                    type: string
+                tagList:
+                    type: array
+                    items:
+                        type: string
+        realworld.v1.FavoriteArticleRequest:
+            type: object
+            properties:
+                slug:
+                    type: string
+        realworld.v1.FollowUserRequest:
+            type: object
+            properties:
+                username:
+                    type: string
+        realworld.v1.GetProfileReply:
+            type: object
+            properties: {}
+        realworld.v1.ListArticlesReply:
+            type: object
+            properties:
+                articles:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/realworld.v1.Article'
+                articlesCount:
+                    type: integer
+                    format: uint32
+        realworld.v1.LoginReply:
+            type: object
+            properties:
+                user:
+                    $ref: '#/components/schemas/realworld.v1.LoginReply_User'
+        realworld.v1.LoginReply_User:
+            type: object
+            properties:
+                email:
+                    type: string
+                token:
+                    type: string
+                username:
+                    type: string
+                bio:
+                    type: string
+                image:
+                    type: string
+        realworld.v1.LoginRequest:
+            type: object
+            properties:
+                user:
+                    $ref: '#/components/schemas/realworld.v1.LoginRequest_User'
+        realworld.v1.LoginRequest_User:
+            type: object
+            properties:
+                email:
+                    type: string
+                password:
+                    type: string
+        realworld.v1.ProfileReply:
+            type: object
+            properties: {}
+        realworld.v1.RegisterReply:
+            type: object
+            properties:
+                user:
+                    $ref: '#/components/schemas/realworld.v1.RegisterReply_User'
+        realworld.v1.RegisterReply_User:
+            type: object
+            properties:
+                username:
+                    type: string
+                email:
+                    type: string
+        realworld.v1.RegisterRequest:
+            type: object
+            properties:
+                user:
+                    $ref: '#/components/schemas/realworld.v1.RegisterRequest_User'
+        realworld.v1.RegisterRequest_User:
+            type: object
+            properties:
+                username:
+                    type: string
+                email:
+                    type: string
+                password:
+                    type: string
+        realworld.v1.SingleArticleReply:
+            type: object
+            properties: {}
+        realworld.v1.SingleCommentReply:
+            type: object
+            properties: {}
+        realworld.v1.TagsListReply:
+            type: object
+            properties:
+                tags:
+                    type: array
+                    items:
+                        type: string
+        realworld.v1.UpdateUserRequest:
+            type: object
+            properties: {}
+        realworld.v1.UserReply:
+            type: object
+            properties:
+                user:
+                    $ref: '#/components/schemas/realworld.v1.UserReply_User'
+        realworld.v1.UserReply_User:
+            type: object
+            properties:
+                email:
+                    type: string
+                token:
+                    type: string
+                username:
+                    type: string
+                bio:
+                    type: string
+                image:
+                    type: string
 tags:
     - name: RealWorld

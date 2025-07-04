@@ -55,6 +55,11 @@ generate:
 	go generate ./...
 	go mod tidy
 
+.PHONY: wire
+# 使用 wire 生成依赖注入代码
+wire:
+	cd cmd/realworld_demo/ && wire
+
 .PHONY: all
 # generate all
 all:
