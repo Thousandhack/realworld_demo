@@ -8,9 +8,11 @@ import (
 	"realworld_demo/internal/service"
 
 	"github.com/go-kratos/kratos/v2/log"
+	"github.com/go-kratos/kratos/v2/middleware"
 	"github.com/go-kratos/kratos/v2/middleware/logging"
 	"github.com/go-kratos/kratos/v2/middleware/recovery"
 	"github.com/go-kratos/kratos/v2/middleware/selector"
+	"github.com/go-kratos/kratos/v2/transport"
 	"github.com/go-kratos/kratos/v2/transport/http"
 	"github.com/gorilla/handlers"
 )
@@ -18,13 +20,13 @@ import (
 func NewSkipRoutersMatcher() selector.MatchFunc {
 
 	skipRouters := map[string]struct{}{
-		"/realworld.v1.Conduit/Login":        {},
-		"/realworld.v1.Conduit/Register":     {},
-		"/realworld.v1.Conduit/GetArticle":   {},
-		"/realworld.v1.Conduit/ListArticles": {},
-		"/realworld.v1.Conduit/GetComments":  {},
-		"/realworld.v1.Conduit/GetTags":      {},
-		"/realworld.v1.Conduit/GetProfile":   {},
+		"/realworld.v1.RealWorld/Login":        {},
+		"/realworld.v1.RealWorld/Register":     {},
+		"/realworld.v1.RealWorld/GetArticle":   {},
+		"/realworld.v1.RealWorld/ListArticles": {},
+		"/realworld.v1.RealWorld/GetComments":  {},
+		"/realworld.v1.RealWorld/GetTags":      {},
+		"/realworld.v1.RealWorld/GetProfile":   {},
 	}
 
 	return func(ctx context.Context, operation string) bool {
@@ -37,8 +39,24 @@ func NewSkipRoutersMatcher() selector.MatchFunc {
 
 // NewHTTPServer new a HTTP server.
 func NewHTTPServer(c *conf.Server, jwtc *conf.JWT, s *service.RealWorldService, logger log.Logger) *http.Server {
+	// 添加HTTP请求日志中间件
+	httpLogger := log.NewHelper(logger)
+
+	// 日志中间件
+	logMiddleware := func(handler middleware.Handler) middleware.Handler {
+		return func(ctx context.Context, req interface{}) (reply interface{}, err error) {
+			if tr, ok := transport.FromServerContext(ctx); ok {
+				httpLogger.Infof("收到HTTP请求: %s %s", tr.Kind(), tr.Operation())
+			}
+			return handler(ctx, req)
+		}
+	}
+
 	var opts = []http.ServerOption{
 		http.ErrorEncoder(errorEncoder),
+
+		// 添加自定义日志中间件
+		http.Middleware(logMiddleware),
 
 		http.Middleware(
 			recovery.Recovery(),
@@ -63,6 +81,15 @@ func NewHTTPServer(c *conf.Server, jwtc *conf.JWT, s *service.RealWorldService, 
 		opts = append(opts, http.Timeout(c.Http.Timeout.AsDuration()))
 	}
 	srv := http.NewServer(opts...)
+
+	// 添加一个简单的调试路由
+	srv.Route("/").GET("/debug/health", func(ctx http.Context) error {
+		return ctx.JSON(200, map[string]interface{}{
+			"status":  "ok",
+			"message": "服务器正常运行",
+		})
+	})
+
 	v1.RegisterRealWorldHTTPServer(srv, s)
 	return srv
 }

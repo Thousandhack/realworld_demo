@@ -2,8 +2,9 @@ package biz
 
 import (
 	"context"
+	"fmt"
 	"realworld_demo/internal/conf"
-	"realworld_demo/internal/pkg/middleware"
+	auth "realworld_demo/internal/pkg/middleware"
 
 	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/log"
@@ -91,18 +92,76 @@ func (uc *UserUsecase) generateToken(userID uint) string {
 }
 
 func (uc *UserUsecase) Register(ctx context.Context, username, email, password string) (*UserLogin, error) {
+	// 参数验证
+	if email == "" {
+		uc.log.Error("注册失败: email为空")
+		return nil, errors.New(422, "email", "不能为空")
+	}
+	if username == "" {
+		uc.log.Error("注册失败: username为空")
+		return nil, errors.New(422, "username", "不能为空")
+	}
+	if password == "" {
+		uc.log.Error("注册失败: password为空")
+		return nil, errors.New(422, "password", "不能为空")
+	}
+
+	uc.log.Infof("开始注册用户: email=%s, username=%s", email, username)
+
+	// 检查邮箱是否已存在
+	_, err := uc.ur.GetUserByEmail(ctx, email)
+	if err == nil {
+		uc.log.Errorf("注册失败: 邮箱 %s 已存在", email)
+		return nil, errors.New(422, "email", "已被注册")
+	} else if !errors.Is(err, errors.NotFound("user", "not found by email")) {
+		uc.log.Errorf("查询用户邮箱时发生错误: %v", err)
+		return nil, errors.InternalServer("user", "查询用户邮箱时发生错误")
+	}
+
+	// 检查用户名是否已存在
+	_, err = uc.ur.GetUserByUsername(ctx, username)
+	if err == nil {
+		uc.log.Errorf("注册失败: 用户名 %s 已存在", username)
+		return nil, errors.New(422, "username", "已被使用")
+	} else if !errors.Is(err, errors.NotFound("user", "not found")) {
+		uc.log.Errorf("查询用户名时发生错误: %v", err)
+		return nil, errors.InternalServer("user", "查询用户名时发生错误")
+	}
+
+	// 创建用户
 	u := &User{
 		Email:        email,
 		Username:     username,
 		PasswordHash: hashPassword(password),
 	}
+
 	if err := uc.ur.CreateUser(ctx, u); err != nil {
-		return nil, err
+		uc.log.Errorf("创建用户失败: %v", err)
+		return nil, errors.InternalServer("user", fmt.Sprintf("创建用户失败: %v", err))
 	}
+
+	// 确保用户ID已被设置
+	if u.ID == 0 {
+		uc.log.Error("用户ID未被设置，无法生成token")
+		return nil, errors.InternalServer("user", "创建用户后ID未设置")
+	}
+
+	// 生成token
+	token := uc.generateToken(u.ID)
+	if token == "" {
+		uc.log.Error("生成token失败")
+		return nil, errors.InternalServer("user", "生成token失败")
+	}
+
+	uc.log.Infof("用户注册成功: id=%d, email=%s, username=%s, token=%s", u.ID, email, username, token)
+
+	// 返回用户信息
 	return &UserLogin{
 		Email:    email,
 		Username: username,
-		Token:    uc.generateToken(u.ID),
+		Token:    token,
+		Bio:      u.Bio,
+		Image:    u.Image,
 	}, nil
 }
 
@@ -110,6 +169,7 @@ func (uc *UserUsecase) Login(ctx context.Context, email, password string) (*User
 	if len(email) == 0 {
 		return nil, errors.New(422, "email", "cannot be empty")
 	}
+	fmt.Println(email, password, "=================")
 	u, err := uc.ur.GetUserByEmail(ctx, email)
 	if err != nil {
 		return nil, err
