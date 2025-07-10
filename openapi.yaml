@@ -358,7 +358,7 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/realworld.v1.RegisterReply'
+                                $ref: '#/components/schemas/realworld.v1.UserReply'
     /api/users/login:
         post:
             tags:
@@ -544,18 +544,6 @@ components:
                     type: string
                 following:
                     type: boolean
-        realworld.v1.RegisterReply:
-            type: object
-            properties:
-                user:
-                    $ref: '#/components/schemas/realworld.v1.RegisterReply_User'
-        realworld.v1.RegisterReply_User:
-            type: object
-            properties:
-                username:
-                    type: string
-                email:
-                    type: string
         realworld.v1.RegisterRequest:
             type: object
             properties:
@@ -622,7 +610,22 @@ components:
                         type: string
         realworld.v1.UpdateUserRequest:
             type: object
-            properties: {}
+            properties:
+                user:
+                    $ref: '#/components/schemas/realworld.v1.UpdateUserRequest_User'
+        realworld.v1.UpdateUserRequest_User:
+            type: object
+            properties:
+                email:
+                    type: string
+                password:
+                    type: string
+                username:
+                    type: string
+                bio:
+                    type: string
+                image:
+                    type: string
         realworld.v1.UserReply:
             type: object
             properties:

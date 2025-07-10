@@ -38,7 +38,7 @@ func wireApp(confServer *conf.Server, confData *conf.Data, logger log.Logger) (*
 	socialUsecase := biz.NewSocialUsecase(articleRepo, profileRepo, commentRepo, logger)
 	realWorldService := service.NewRealWorldService(userUsecase, socialUsecase, logger)
 	grpcServer := server.NewGRPCServer(confServer, realWorldService, logger)
-	httpServer := server.NewHTTPServer(confServer, realWorldService, logger)
+	httpServer := server.NewHTTPServer(confServer, jwt, realWorldService, logger)
 	app := newApp(logger, grpcServer, httpServer)
 	return app, func() {
 		cleanup()
