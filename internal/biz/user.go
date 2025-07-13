@@ -36,6 +36,7 @@ type UserUpdate struct {
 	Image    string
 }
 
+// hashPassword 使用 bcrypt 对密码进行哈希处理
 func hashPassword(pwd string) string {
 	b, err := bcrypt.GenerateFromPassword([]byte(pwd), bcrypt.DefaultCost)
 	if err != nil {
@@ -144,13 +145,12 @@ func (uc *UserUsecase) Login(ctx context.Context, email, password string) (*User
 	if len(email) == 0 {
 		return nil, errors.New(422, "email", "cannot be empty")
 	}
-	fmt.Println(email, password, "=================")
 	u, err := uc.ur.GetUserByEmail(ctx, email)
 	if err != nil {
 		return nil, err
 	}
 	if !verifyPassword(u.PasswordHash, password) {
-		return nil, errors.Unauthorized("user", "login failed")
+		return nil, errors.Unauthorized("user", "登录失败，账号或密码错误")
 	}
 
 	return &UserLogin{
