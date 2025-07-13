@@ -13,6 +13,7 @@ import (
 // NewGRPCServer new a gRPC server.
 func NewGRPCServer(c *conf.Server, s *service.RealWorldService, logger log.Logger) *grpc.Server {
 	var opts = []grpc.ServerOption{
+		// 中间件
 		grpc.Middleware(
 			recovery.Recovery(),
 		),

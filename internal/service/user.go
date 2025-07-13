@@ -23,12 +23,6 @@ func (s *RealWorldService) Login(ctx context.Context, req *v1.LoginRequest) (rep
 
 // Register 方法
 func (s *RealWorldService) Register(ctx context.Context, req *v1.RegisterRequest) (reply *v1.UserReply, err error) {
-	fmt.Println("\n\n=== 开始处理注册请求 ===")
-	if req.User == nil {
-		fmt.Println("请求参数错误: user为空")
-		return nil, fmt.Errorf("请求参数错误: user为空")
-	}
-
 	fmt.Printf("注册用户: email=%s, username=%s\n", req.User.Email, req.User.Username)
 	// 调用业务层注册用户
 	u, err := s.uc.Register(ctx, req.User.Username, req.User.Email, req.User.Password)
@@ -36,7 +30,6 @@ func (s *RealWorldService) Register(ctx context.Context, req *v1.RegisterRequest
 		fmt.Printf("注册失败: %v\n", err)
 		return nil, err
 	}
-
 	if u == nil {
 		fmt.Println("注册失败: 业务层返回的用户对象为空")
 		return nil, fmt.Errorf("注册失败: 业务层返回的用户对象为空")

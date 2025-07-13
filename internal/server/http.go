@@ -18,7 +18,7 @@ import (
 )
 
 func NewSkipRoutersMatcher() selector.MatchFunc {
-
+	// 跳过权限验证的接口
 	skipRouters := map[string]struct{}{
 		"/realworld.v1.RealWorld/Login":        {},
 		"/realworld.v1.RealWorld/Register":     {},
@@ -56,9 +56,8 @@ func NewHTTPServer(c *conf.Server, jwtc *conf.JWT, s *service.RealWorldService, 
 		http.ErrorEncoder(errorEncoder),
 
 		// 添加自定义日志中间件
-		http.Middleware(logMiddleware),
-
 		http.Middleware(
+			logMiddleware,
 			recovery.Recovery(),
 			selector.Server(auth.JWTAuth(jwtc.Secret)).Match(NewSkipRoutersMatcher()).Build(),
 			logging.Server(logger),
