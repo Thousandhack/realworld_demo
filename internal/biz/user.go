@@ -92,20 +92,6 @@ func (uc *UserUsecase) generateToken(userID uint) string {
 }
 
 func (uc *UserUsecase) Register(ctx context.Context, username, email, password string) (*UserLogin, error) {
-	// 参数验证
-	if email == "" {
-		uc.log.Error("注册失败: email为空")
-		return nil, errors.New(422, "email", "不能为空")
-	}
-	if username == "" {
-		uc.log.Error("注册失败: username为空")
-		return nil, errors.New(422, "username", "不能为空")
-	}
-	if password == "" {
-		uc.log.Error("注册失败: password为空")
-		return nil, errors.New(422, "password", "不能为空")
-	}
-
 	uc.log.Infof("开始注册用户: email=%s, username=%s", email, username)
 
 	// 检查邮箱是否已存在
@@ -117,17 +103,6 @@ func (uc *UserUsecase) Register(ctx context.Context, username, email, password s
 		uc.log.Errorf("查询用户邮箱时发生错误: %v", err)
 		return nil, errors.InternalServer("user", "查询用户邮箱时发生错误")
 	}
-
-	// 检查用户名是否已存在
-	_, err = uc.ur.GetUserByUsername(ctx, username)
-	if err == nil {
-		uc.log.Errorf("注册失败: 用户名 %s 已存在", username)
-		return nil, errors.New(422, "username", "已被使用")
-	} else if !errors.Is(err, errors.NotFound("user", "not found")) {
-		uc.log.Errorf("查询用户名时发生错误: %v", err)
-		return nil, errors.InternalServer("user", "查询用户名时发生错误")
-	}
-
 	// 创建用户
 	u := &User{
 		Email:        email,

@@ -47,20 +47,6 @@ func (s *RealWorldService) Register(ctx context.Context, req *v1.RegisterRequest
 	}
 
 	fmt.Printf("注册用户: email=%s, username=%s\n", req.User.Email, req.User.Username)
-
-	if req.User.Email == "" {
-		fmt.Println("请求参数错误: email为空")
-		return nil, fmt.Errorf("请求参数错误: email为空")
-	}
-	if req.User.Password == "" {
-		fmt.Println("请求参数错误: password为空")
-		return nil, fmt.Errorf("请求参数错误: password为空")
-	}
-	if req.User.Username == "" {
-		fmt.Println("请求参数错误: username为空")
-		return nil, fmt.Errorf("请求参数错误: username为空")
-	}
-
 	// 调用业务层注册用户
 	u, err := s.uc.Register(ctx, req.User.Username, req.User.Email, req.User.Password)
 	if err != nil {
