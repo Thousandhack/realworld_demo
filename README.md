@@ -61,4 +61,11 @@ biz 目录主要编写业务逻辑代码
 
 # wire 注入相关生成的命令：
 cd cmd/realworld_demo/ && wire
+
+
+service 层 调用 biz 层的代码
+
+internal 目录下的代码data下的 **Repo 的interface
+是需要 wire 注入的
+
 ```

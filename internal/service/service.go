@@ -9,7 +9,7 @@ import (
 	"github.com/go-kratos/kratos/v2/log"
 )
 
-// ProviderSet is service providers.
+// ProviderSet is service providers. 依赖注入的集合
 var ProviderSet = wire.NewSet(NewRealWorldService)
 
 type RealWorldService struct {

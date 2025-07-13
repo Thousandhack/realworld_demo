@@ -10,7 +10,7 @@ import (
 	"gorm.io/gorm"
 )
 
-// ProviderSet is data providers. 需要加载的要加入到这里
+// ProviderSet is data providers. 依赖注入的集合
 var ProviderSet = wire.NewSet(
 	NewData,
 	NewDB,
